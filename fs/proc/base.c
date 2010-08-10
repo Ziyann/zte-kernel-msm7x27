@@ -63,6 +63,7 @@
 #include <linux/namei.h>
 #include <linux/mnt_namespace.h>
 #include <linux/mm.h>
+#include <linux/swap.h>
 #include <linux/rcupdate.h>
 #include <linux/kallsyms.h>
 #include <linux/stacktrace.h>
@@ -128,12 +129,6 @@ struct pid_entry {
 	NOD(NAME, (S_IFREG|(MODE)), 			\
 		NULL, &proc_single_file_operations,	\
 		{ .proc_show = show } )
-
-/* ANDROID is for special files in /proc. */
-#define ANDROID(NAME, MODE, OTYPE)			\
-	NOD(NAME, (S_IFREG|(MODE)),			\
-		&proc_##OTYPE##_inode_operations,	\
-		&proc_##OTYPE##_operations, {})
 
 /*
  * Count the number of hardlinks for the pid_entry table, excluding the .
@@ -236,8 +231,7 @@ struct mm_struct *mm_for_maps(struct task_struct *task)
 
 	mm = get_task_mm(task);
 	if (mm && mm != current->mm &&
-			!ptrace_may_access(task, PTRACE_MODE_READ) &&
-			!capable(CAP_SYS_RESOURCE)) {
+			!ptrace_may_access(task, PTRACE_MODE_READ)) {
 		mmput(mm);
 		mm = NULL;
 	}
@@ -434,17 +428,14 @@ static const struct file_operations proc_lstats_operations = {
 
 #endif
 
-/* The badness from the OOM killer */
-unsigned long badness(struct task_struct *p, unsigned long uptime);
 static int proc_oom_score(struct task_struct *task, char *buffer)
 {
 	unsigned long points = 0;
-	struct timespec uptime;
 
-	do_posix_clock_monotonic_gettime(&uptime);
 	read_lock(&tasklist_lock);
 	if (pid_alive(task))
-		points = badness(task, uptime.tv_sec);
+		points = oom_badness(task, NULL, NULL,
+					totalram_pages + total_swap_pages);
 	read_unlock(&tasklist_lock);
 	return sprintf(buffer, "%lu\n", points);
 }
@@ -1047,44 +1038,101 @@ static ssize_t oom_adjust_write(struct file *file, const char __user *buf,
 	}
 
 	task->signal->oom_adj = oom_adjust;
-
+	/*
+	 * Scale /proc/pid/oom_score_adj appropriately ensuring that a maximum
+	 * value is always attainable.
+	 */
+	if (task->signal->oom_adj == OOM_ADJUST_MAX)
+		task->signal->oom_score_adj = OOM_SCORE_ADJ_MAX;
+	else
+		task->signal->oom_score_adj = (oom_adjust * OOM_SCORE_ADJ_MAX) /
+								-OOM_DISABLE;
 	unlock_task_sighand(task, &flags);
 	put_task_struct(task);
 
 	return count;
 }
 
-static int oom_adjust_permission(struct inode *inode, int mask)
-{
-	uid_t uid;
-	struct task_struct *p = get_proc_task(inode);
-	if(p) {
-		uid = task_uid(p);
-		put_task_struct(p);
-	}
-
-	/*
-	 * System Server (uid == 1000) is granted access to oom_adj of all 
-	 * android applications (uid > 10000) as and services (uid >= 1000)
-	 */
-	if (p && (current_fsuid() == 1000) && (uid >= 1000)) {
-		if (inode->i_mode >> 6 & mask) {
-			return 0;
-		}
-	}
-
-	/* Fall back to default. */
-	return generic_permission(inode, mask, NULL);
-}
-
-static const struct inode_operations proc_oom_adjust_inode_operations = {
-	.permission	= oom_adjust_permission,
-};
-
 static const struct file_operations proc_oom_adjust_operations = {
 	.read		= oom_adjust_read,
 	.write		= oom_adjust_write,
 	.llseek		= generic_file_llseek,
+};
+
+static ssize_t oom_score_adj_read(struct file *file, char __user *buf,
+					size_t count, loff_t *ppos)
+{
+	struct task_struct *task = get_proc_task(file->f_path.dentry->d_inode);
+	char buffer[PROC_NUMBUF];
+	int oom_score_adj = OOM_SCORE_ADJ_MIN;
+	unsigned long flags;
+	size_t len;
+
+	if (!task)
+		return -ESRCH;
+	if (lock_task_sighand(task, &flags)) {
+		oom_score_adj = task->signal->oom_score_adj;
+		unlock_task_sighand(task, &flags);
+	}
+	put_task_struct(task);
+	len = snprintf(buffer, sizeof(buffer), "%d\n", oom_score_adj);
+	return simple_read_from_buffer(buf, count, ppos, buffer, len);
+}
+
+static ssize_t oom_score_adj_write(struct file *file, const char __user *buf,
+					size_t count, loff_t *ppos)
+{
+	struct task_struct *task;
+	char buffer[PROC_NUMBUF];
+	unsigned long flags;
+	long oom_score_adj;
+	int err;
+
+	memset(buffer, 0, sizeof(buffer));
+	if (count > sizeof(buffer) - 1)
+		count = sizeof(buffer) - 1;
+	if (copy_from_user(buffer, buf, count))
+		return -EFAULT;
+
+	err = strict_strtol(strstrip(buffer), 0, &oom_score_adj);
+	if (err)
+		return -EINVAL;
+	if (oom_score_adj < OOM_SCORE_ADJ_MIN ||
+			oom_score_adj > OOM_SCORE_ADJ_MAX)
+		return -EINVAL;
+
+	task = get_proc_task(file->f_path.dentry->d_inode);
+	if (!task)
+		return -ESRCH;
+	if (!lock_task_sighand(task, &flags)) {
+		put_task_struct(task);
+		return -ESRCH;
+	}
+	if (oom_score_adj < task->signal->oom_score_adj &&
+			!capable(CAP_SYS_RESOURCE)) {
+		unlock_task_sighand(task, &flags);
+		put_task_struct(task);
+		return -EACCES;
+	}
+
+	task->signal->oom_score_adj = oom_score_adj;
+	/*
+	 * Scale /proc/pid/oom_adj appropriately ensuring that OOM_DISABLE is
+	 * always attainable.
+	 */
+	if (task->signal->oom_score_adj == OOM_SCORE_ADJ_MIN)
+		task->signal->oom_adj = OOM_DISABLE;
+	else
+		task->signal->oom_adj = (oom_score_adj * OOM_ADJUST_MAX) /
+							OOM_SCORE_ADJ_MAX;
+	unlock_task_sighand(task, &flags);
+	put_task_struct(task);
+	return count;
+}
+
+static const struct file_operations proc_oom_score_adj_operations = {
+	.read		= oom_score_adj_read,
+	.write		= oom_score_adj_write,
 };
 
 #ifdef CONFIG_AUDITSYSCALL
@@ -2658,7 +2706,8 @@ static const struct pid_entry tgid_base_stuff[] = {
 	REG("cgroup",  S_IRUGO, proc_cgroup_operations),
 #endif
 	INF("oom_score",  S_IRUGO, proc_oom_score),
-	ANDROID("oom_adj",S_IRUGO|S_IWUSR, oom_adjust),
+	REG("oom_adj",    S_IRUGO|S_IWUSR, proc_oom_adjust_operations),
+	REG("oom_score_adj", S_IRUGO|S_IWUSR, proc_oom_score_adj_operations),
 #ifdef CONFIG_AUDITSYSCALL
 	REG("loginuid",   S_IWUSR|S_IRUGO, proc_loginuid_operations),
 	REG("sessionid",  S_IRUGO, proc_sessionid_operations),
@@ -2992,7 +3041,8 @@ static const struct pid_entry tid_base_stuff[] = {
 	REG("cgroup",  S_IRUGO, proc_cgroup_operations),
 #endif
 	INF("oom_score", S_IRUGO, proc_oom_score),
-	ANDROID("oom_adj",S_IRUGO|S_IWUSR, oom_adjust),
+	REG("oom_adj",   S_IRUGO|S_IWUSR, proc_oom_adjust_operations),
+	REG("oom_score_adj", S_IRUGO|S_IWUSR, proc_oom_score_adj_operations),
 #ifdef CONFIG_AUDITSYSCALL
 	REG("loginuid",  S_IWUSR|S_IRUGO, proc_loginuid_operations),
 	REG("sessionid",  S_IRUSR, proc_sessionid_operations),
