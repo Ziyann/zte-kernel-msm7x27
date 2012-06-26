@@ -171,13 +171,16 @@ EXPORT_SYMBOL(free_task);
 static inline void free_signal_struct(struct signal_struct *sig)
 {
 	taskstats_tgid_free(sig);
+	sched_autogroup_exit(sig);
 	kmem_cache_free(signal_cachep, sig);
 }
 
 static inline void put_signal_struct(struct signal_struct *sig)
 {
-	if (atomic_dec_and_test(&sig->sigcnt))
-		free_signal_struct(sig);
+	if (atomic_dec_and_test(&sig->sigcnt)) {
+	  sched_autogroup_exit(sig);
+	  free_signal_struct(sig);
+	}
 }
 
 int task_free_register(struct notifier_block *n)
@@ -921,7 +924,8 @@ static int copy_signal(unsigned long clone_flags, struct task_struct *tsk)
 	posix_cpu_timers_init_group(sig);
 
 	tty_audit_fork(sig);
-
+	sched_autogroup_exit(sig);
+	
 	sig->oom_adj = current->signal->oom_adj;
 	sig->oom_score_adj = current->signal->oom_score_adj;
 
