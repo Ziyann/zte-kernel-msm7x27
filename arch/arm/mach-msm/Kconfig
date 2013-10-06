@@ -3,21 +3,6 @@ if ARCH_MSM
 choice
 	prompt "MSM SoC Type"
 	default ARCH_MSM7X00A
-
-config ARCH_MSM7X01A
-	bool "MSM7x00A / MSM7x01A"
-	select ARCH_MSM_ARM11
-	select MSM_VIC
-	select CPU_V6
-	select MSM_REMOTE_SPINLOCK_SWP
-
-config ARCH_MSM7X25
-	bool "MSM7x25"
-	select ARCH_MSM_ARM11
-	select MSM_VIC
-	select CPU_V6
-	select MSM_REMOTE_SPINLOCK_SWP
-
 config ARCH_MSM7X27
 	bool "MSM7x27"
 	select ARCH_MSM_ARM11
@@ -25,51 +10,6 @@ config ARCH_MSM7X27
 	select CPU_V6
 	select MSM_REMOTE_SPINLOCK_SWP
 	select MSM_GPIOMUX
-
-config ARCH_MSM7X30
-	bool "MSM7x30"
-	select ARCH_MSM_SCORPION
-	select MSM_VIC
-	select CPU_V7
-	select MSM_REMOTE_SPINLOCK_DEKKERS
-	select ARCH_SPARSEMEM_ENABLE
-	select MEMORY_HOTPLUG
-	select MEMORY_HOTREMOVE
-	select MIGRATION
-	select ARCH_MEMORY_PROBE
-	select ARCH_MEMORY_REMOVE
-	select DONT_RESERVE_FROM_MOVABLE_ZONE
-	select MSM_GPIOMUX
-	select RESERVE_FIRST_PAGE
-
-config ARCH_QSD8X50
-	bool "QSD8X50"
-	select ARCH_MSM_SCORPION
-	select MSM_VIC
-	select CPU_V7
-	select MSM_REMOTE_SPINLOCK_LDREX
-	select EMULATE_DOMAIN_MANAGER_V7
-	select MSM_GPIOMUX
-
-config ARCH_MSM8X60
-	bool "MSM8X60"
-	select ARCH_MSM_SCORPIONMP
-	select SMP_PARALLEL_START if SMP
-	select ARM_GIC
-	select CPU_V7
-	select MSM_REMOTE_SPINLOCK_LDREX
-	select ARCH_REQUIRE_GPIOLIB
-	select MSM_ADM3
-	select REGULATOR
-	select MSM_V2_TLMM
-	select MSM_PIL
-	select MSM_SCM
-	select ARCH_HAS_CPU_IDLE_WAIT
-	select MSM_DIRECT_SCLK_ACCESS
-	select MSM_RPM
-	select MSM_XO
-	select MSM_GPIOMUX
-	select MSM_BUS_SCALING
 
 endchoice
 
@@ -80,17 +20,9 @@ config MSM_SOC_REV_NONE
 	bool "N/A"
 	select EMULATE_DOMAIN_MANAGER_V7 if ARCH_QSD8X50
 	select VERIFY_PERMISSION_FAULT if ARCH_QSD8X50
-if ARCH_QSD8X50
-config MSM_SOC_REV_A
-	bool "Rev. A"
-endif
 endchoice
 
 config  ARCH_MSM_ARM11
-	bool
-config  ARCH_MSM_SCORPION
-	bool
-config  ARCH_MSM_SCORPIONMP
 	bool
 
 config  MSM_VIC
@@ -377,60 +309,6 @@ config MACH_SAPPHIRE
 	default n
 	bool "Sapphire"
 
-config MACH_QSD8X50_SURF
-	depends on ARCH_QSD8X50
-	depends on MSM_SOC_REV_NONE
-	depends on MSM_STACKED_MEMORY
-	default y
-	bool "QSD8x50 SURF"
-	help
-	  Support for the Qualcomm QSD8x50 SURF eval board.
-
-config MACH_QSD8X50_FFA
-	depends on ARCH_QSD8X50
-	depends on MSM_SOC_REV_NONE
-	depends on MSM_STACKED_MEMORY
-	default y
-	bool "QSD8x50 FFA"
-	help
-	  Support for the Qualcomm QSD8x50 FFA eval board.
-
-config MACH_QSD8X50_COMET
-	depends on ARCH_QSD8X50
-	depends on MSM_SOC_REV_NONE
-	depends on MSM_STACKED_MEMORY
-	default n
-	bool "QSD8x50 Comet"
-	help
-	  Support for the Qualcomm Comet eval board.
-
-config MACH_QSD8X50A_SURF
-	depends on ARCH_QSD8X50
-	depends on MSM_SOC_REV_A
-	depends on MSM_STACKED_MEMORY
-	default y
-	bool "QSD8x50A SURF"
-	help
-	  Support for the Qualcomm QSD8x50A SURF eval board.
-
-config MACH_QSD8X50A_FFA
-	depends on ARCH_QSD8X50
-	depends on MSM_SOC_REV_A
-	depends on MSM_STACKED_MEMORY
-	default y
-	bool "QSD8x50A FFA"
-	help
-	  Support for the Qualcomm QSD8x50A FFA eval board.
-
-config MACH_QSD8X50A_ST1_5
-	depends on ARCH_QSD8X50
-	depends on MSM_SOC_REV_A
-	depends on MSM_STACKED_MEMORY
-	default y
-	bool "QSD8x50A ST1.5"
-	help
-	  Support for the Qualcomm ST1.5.
-
 config MACH_MSM7X25_SURF
 	depends on ARCH_MSM7X25
 	depends on !MSM_STACKED_MEMORY
@@ -446,97 +324,6 @@ config MACH_MSM7X25_FFA
 	bool "MSM7x25 FFA"
 	help
 	  Support for the Qualcomm MSM7x25 FFA eval board.
-
-config MACH_MSM8X55_SURF
-       depends on ARCH_MSM7X30
-       depends on !MSM_STACKED_MEMORY
-       default y
-       bool "MSM8X55 SURF"
-       help
-         Support for the Qualcomm MSM8x55 SURF eval board.
-
-config MACH_MSM8X55_FFA
-       depends on ARCH_MSM7X30
-       depends on !MSM_STACKED_MEMORY
-       default y
-       bool "MSM8X55 FFA"
-       help
-         Support for the Qualcomm MSM8x55 FFA eval board.
-
-config MACH_MSM8X55_SVLTE_FFA
-       depends on ARCH_MSM7X30
-       depends on !MSM_STACKED_MEMORY
-       default y
-       bool "MSM8X55 SVLTE FFA"
-       help
-         Support for the Qualcomm MSM8x55 SVLTE FFA eval board.
-
-config MACH_MSM8X55_SVLTE_SURF
-       depends on ARCH_MSM7X30
-       depends on !MSM_STACKED_MEMORY
-       default y
-       bool "MSM8X55 SVLTE SURF"
-       help
-         Support for the Qualcomm MSM8x55 SVLTE SURF eval board.
-
-config MACH_MSM8X60_RUMI3
-	depends on ARCH_MSM8X60
-	default n
-	bool "MSM8x60 RUMI3"
-	help
-	  Support for the Qualcomm MSM8x60 RUMI3 emulator.
-
-config MACH_MSM8X60_SIM
-	depends on ARCH_MSM8X60
-	default n
-	bool "MSM8x60 Simulator"
-	help
-	  Support for the Qualcomm MSM8x60 simulator.
-
-config MACH_MSM8X60_SURF
-	depends on ARCH_MSM8X60
-	default n
-	bool "MSM8x60 SURF"
-	help
-	  Support for the Qualcomm MSM8x60 SURF eval board.
-
-config MACH_MSM8X60_FFA
-	depends on ARCH_MSM8X60
-	default n
-	bool "MSM8x60 FFA"
-	help
-	  Support for the Qualcomm MSM8x60 FFA eval board.
-
-config MACH_MSM8X60_QRDC
-	depends on ARCH_MSM8X60
-	default n
-	bool "MSM8x60 QRDC"
-	help
-	  Support for the Qualcomm MSM8x60 QRDC board.
-
-config MACH_MSM8X60_FLUID
-	depends on ARCH_MSM8X60
-	default n
-	bool "MSM8x60 FLUID"
-	help
-	  Support for the Qualcomm MSM8x60 FLUID platform. The FLUID is an
-	  8x60 target which has a form factor that is much closer to that
-	  of a phone than other targets. It also has a new display and
-	  touchscreen controller.
-
-config MACH_MSM8X60_CHARM_SURF
-	depends on ARCH_MSM8X60
-	default n
-	bool "MSM8x60 CHARM SURF"
-	help
-	  Support for the Qualcomm MSM8x60 Charm SURF device.
-
-config MACH_MSM8X60_CHARM_FFA
-	depends on ARCH_MSM8X60
-	default n
-	bool "MSM8x60 CHARM FFA"
-	help
-	  Support for the Qualcomm MSM8x60 Charm FFA device.
 
 endmenu
 
@@ -572,9 +359,6 @@ config PHYS_OFFSET
 	hex
 	default "0x02A00000" if !MSM_STACKED_MEMORY && ZTE_GEN1
 	default "0x02600000" if !MSM_STACKED_MEMORY && ZTE_GEN2
-	default "0x00000000" if ARCH_QSD8X50 && MSM_SOC_REV_A
-	default "0x20000000" if ARCH_QSD8X50
-	default "0x40200000" if ARCH_MSM8X60
 	default "0x10000000"
 
 config KERNEL_PMEM_EBI_REGION
@@ -1149,26 +933,6 @@ config MSM_CPU_FREQ_OVERCLOCK_AHB
 
 endif # CPU_FREQ_MSM
 
-config MSM_CPU_AVS
-	bool "Enable software controlled Adaptive Voltage Scaling (AVS)"
-	depends on (ARCH_MSM_SCORPION && QSD_SVS)
-	depends on ARCH_QSD8X50
-	default n
-	select MSM_AVS_HW
-	help
-	  This enables the s/w control of Adaptive Voltage Scaling feature
-	  in Qualcomm ARMv7 CPUs. It adjusts the voltage for each frequency
-	  based on feedback from three ring oscillators in the CPU.
-
-config MSM_AVS_HW
-	bool "Enable Adaptive Voltage Scaling (AVS)"
-	default n
-	help
-	  Enable AVS hardware to fine tune voltage at each frequency. The
-	  AVS hardware blocks associated with each Qualcomm ARMv7 cores can
-	  fine tune the voltages based on the feedback from the ring
-	  oscillators.
-
 config MSM_HW3D
 	tristate "MSM Hardware 3D Register Driver"
 	depends on ANDROID_PMEM
@@ -1398,9 +1162,6 @@ config SCORPION_Uni_45nm_BUG
 	  workaround for Scorpion Uniprocessor 45nm cores.
 
 	  This bug is not applicable to any ScorpionMP or Scorpion Uni 65nm(SC65U) cores.
-
-config SMMU_8X60
-	bool
 
 config MSM_RPM_LOG
 	tristate "MSM Resource Power Manager Log Driver"
