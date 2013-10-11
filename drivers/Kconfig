@@ -8,6 +8,8 @@ source "drivers/mtd/Kconfig"
 
 source "drivers/of/Kconfig"
 
+source "drivers/parport/Kconfig"
+
 source "drivers/pnp/Kconfig"
 
 source "drivers/block/Kconfig"
@@ -16,11 +18,25 @@ source "drivers/block/Kconfig"
 
 source "drivers/misc/Kconfig"
 
+source "drivers/ide/Kconfig"
+
 source "drivers/scsi/Kconfig"
+
+source "drivers/ata/Kconfig"
 
 source "drivers/md/Kconfig"
 
+source "drivers/message/fusion/Kconfig"
+
+source "drivers/firewire/Kconfig"
+
+source "drivers/message/i2o/Kconfig"
+
+source "drivers/macintosh/Kconfig"
+
 source "drivers/net/Kconfig"
+
+source "drivers/isdn/Kconfig"
 
 source "drivers/telephony/Kconfig"
 
@@ -32,9 +48,13 @@ source "drivers/char/Kconfig"
 
 source "drivers/i2c/Kconfig"
 
+source "drivers/spi/Kconfig"
+
 source "drivers/pps/Kconfig"
 
 source "drivers/gpio/Kconfig"
+
+source "drivers/w1/Kconfig"
 
 source "drivers/power/Kconfig"
 
@@ -46,6 +66,10 @@ source "drivers/watchdog/Kconfig"
 
 source "drivers/ssb/Kconfig"
 
+source "drivers/mfd/Kconfig"
+
+source "drivers/regulator/Kconfig"
+
 source "drivers/media/Kconfig"
 
 source "drivers/video/Kconfig"
@@ -56,6 +80,8 @@ source "drivers/hid/Kconfig"
 
 source "drivers/usb/Kconfig"
 
+source "drivers/uwb/Kconfig"
+
 source "drivers/mmc/Kconfig"
 
 source "drivers/memstick/Kconfig"
@@ -64,13 +90,25 @@ source "drivers/leds/Kconfig"
 
 source "drivers/switch/Kconfig"
 
+source "drivers/accessibility/Kconfig"
+
+source "drivers/infiniband/Kconfig"
+
 source "drivers/edac/Kconfig"
 
 source "drivers/rtc/Kconfig"
 
 source "drivers/dma/Kconfig"
 
+source "drivers/dca/Kconfig"
+
+source "drivers/auxdisplay/Kconfig"
+
 source "drivers/uio/Kconfig"
+
+source "drivers/vlynq/Kconfig"
+
+source "drivers/xen/Kconfig"
 
 source "drivers/staging/Kconfig"
 

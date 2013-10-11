@@ -110,6 +110,7 @@ static const struct bin_table bin_kern_table[] = {
 	{ CTL_STR,	KERN_HOTPLUG,			"hotplug", },
 	{ CTL_INT,	KERN_IEEE_EMULATION_WARNINGS,	"ieee_emulation_warnings" },
 
+	{ CTL_INT,	KERN_S390_USER_DEBUG_LOGGING,	"userprocess_debug" },
 	{ CTL_INT,	KERN_CORE_USES_PID,		"core_uses_pid" },
 	/* KERN_TAINTED "tainted" no longer used */
 	{ CTL_INT,	KERN_CADPID,			"cad_pid" },
@@ -872,6 +873,13 @@ static const struct bin_table bin_bus_table[] = {
 	{}
 };
 
+
+static const struct bin_table bin_s390dbf_table[] = {
+	{ CTL_INT,	5678 /* CTL_S390DBF_STOPPABLE */, "debug_stoppable" },
+	{ CTL_INT,	5679 /* CTL_S390DBF_ACTIVE */,	  "debug_active" },
+	{}
+};
+
 static const struct bin_table bin_sunrpc_table[] = {
 	/* CTL_RPCDEBUG	"rpc_debug"  no longer used */
 	/* CTL_NFSDEBUG "nfs_debug"  no longer used */
@@ -906,6 +914,8 @@ static const struct bin_table bin_root_table[] = {
 	{ CTL_DIR,	CTL_ABI,	"abi" },
 	/* CTL_CPU not used */
 	/* CTL_ARLAN "arlan" no longer used */
+	{ CTL_DIR,	CTL_S390DBF,	"s390dbf",	bin_s390dbf_table },
+	{ CTL_DIR,	CTL_SUNRPC,	"sunrpc",	bin_sunrpc_table },
 	{ CTL_DIR,	CTL_PM,		"pm",		bin_pm_table },
 	{}
 };

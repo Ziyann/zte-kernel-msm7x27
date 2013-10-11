@@ -146,6 +146,14 @@ NORET_TYPE void panic(const char * fmt, ...)
 		printk(KERN_EMERG "Press Stop-A (L1-A) to return to the boot prom\n");
 	}
 #endif
+#if defined(CONFIG_S390)
+	{
+		unsigned long caller;
+
+		caller = (unsigned long)__builtin_return_address(0);
+		disabled_wait(caller);
+	}
+#endif
 	local_irq_enable();
 	while (1) {
 		touch_softlockup_watchdog();
