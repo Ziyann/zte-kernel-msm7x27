@@ -1138,8 +1138,6 @@ config DCC_TTY
 	tristate "DCC tty driver"
 	depends on ARM
 
-source "drivers/s390/char/Kconfig"
-
 config RAMOOPS
 	tristate "Log panic/oops to a RAM buffer"
 	depends on HAS_IOMEM

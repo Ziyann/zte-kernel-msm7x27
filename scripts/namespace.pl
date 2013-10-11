@@ -282,7 +282,6 @@ sub do_nm
 			&& $fullname ne "drivers/acpi/namespace/nsdump.o"
 			&& $fullname ne "arch/ia64/sn/kernel/sn2/io.o"
 			&& $fullname ne "arch/ia64/kernel/gate-data.o"
-			&& $fullname ne "drivers/ieee1394/oui.o"
 			&& $fullname ne "security/capability.o"
 			&& $fullname ne "sound/core/wrappers.o"
 			&& $fullname ne "fs/ntfs/sysctl.o"
