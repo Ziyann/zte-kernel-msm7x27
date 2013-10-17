@@ -38,13 +38,8 @@ enum {
 static int msm_timer_debug_mask;
 module_param_named(debug_mask, msm_timer_debug_mask, int, S_IRUGO | S_IWUSR | S_IWGRP);
 
-#if defined(CONFIG_ARCH_MSM7X30) || defined(CONFIG_ARCH_MSM8X60)
-#define MSM_GPT_BASE (MSM_TMR_BASE + 0x4)
-#define MSM_DGT_BASE (MSM_TMR_BASE + 0x24)
-#else
 #define MSM_GPT_BASE MSM_TMR_BASE
 #define MSM_DGT_BASE (MSM_TMR_BASE + 0x10)
-#endif
 
 #ifdef CONFIG_MSM7X00A_USE_GP_TIMER
 	#define DG_TIMER_RATING 100
@@ -54,11 +49,7 @@ module_param_named(debug_mask, msm_timer_debug_mask, int, S_IRUGO | S_IWUSR | S_
 	#define MSM_GLOBAL_TIMER MSM_CLOCK_DGT
 #endif
 
-#if defined(CONFIG_ARCH_MSM_ARM11)
 #define MSM_DGT_SHIFT (5)
-#else
-#define MSM_DGT_SHIFT (0)
-#endif
 
 #define TIMER_MATCH_VAL         0x0000
 #define TIMER_COUNT_VAL         0x0004
@@ -93,13 +84,7 @@ enum {
 
 #define NR_TIMERS ARRAY_SIZE(msm_clocks)
 
-#if defined(CONFIG_ARCH_QSD8X50)
-#define DGT_HZ 4800000	/* Uses TCXO/4 (19.2 MHz / 4) */
-#elif defined(CONFIG_ARCH_MSM7X30) || defined(CONFIG_ARCH_MSM8X60)
-#define DGT_HZ 6144000	/* Uses LPXO/4 (24.576 MHz / 4) */
-#else
 #define DGT_HZ 19200000	/* Uses TCXO (19.2 MHz) */
-#endif
 
 #define GPT_HZ 32768
 #define SCLK_HZ 32768
@@ -416,9 +401,6 @@ static void msm_timer_set_mode(enum clock_event_mode mode,
 		clock_state->stopped_tick =
 			msm_read_timer_count(clock, LOCAL_TIMER) +
 			clock_state->sleep_offset;
-#ifdef CONFIG_ARCH_MSM_SCORPIONMP
-		if (clock != &msm_clocks[MSM_CLOCK_DGT])
-#endif
 			writel(0, clock->regbase + TIMER_ENABLE);
 		if (clock != &msm_clocks[MSM_CLOCK_GPT]) {
 			gpt_state->in_sync = 0;
@@ -832,11 +814,7 @@ void msm_timer_exit_idle(int low_power)
 	if (!enabled)
 		writel(TIMER_ENABLE_EN, gpt_clk->regbase + TIMER_ENABLE);
 
-#if defined(CONFIG_ARCH_MSM_SCORPION)
-	gpt_clk_state->in_sync = 0;
-#else
 	gpt_clk_state->in_sync = gpt_clk_state->in_sync && enabled;
-#endif
 	msm_timer_sync_gpt_to_sclk(1);
 
 	if (clock == gpt_clk)
@@ -846,11 +824,7 @@ void msm_timer_exit_idle(int low_power)
 	if (!enabled)
 		writel(TIMER_ENABLE_EN, clock->regbase + TIMER_ENABLE);
 
-#if defined(CONFIG_ARCH_MSM_SCORPION)
-	clock_state->in_sync = 0;
-#else
 	clock_state->in_sync = clock_state->in_sync && enabled;
-#endif
 	msm_timer_sync_to_gpt(clock, 1);
 
 exit_idle_alarm:
@@ -966,23 +940,10 @@ unsigned long long sched_clock(void)
 	return clocksource_cyc2ns(ticks, cs->mult, cs->shift);
 }
 
-#ifdef CONFIG_ARCH_MSM_SCORPIONMP
-int read_current_timer(unsigned long *timer_val)
-{
-	struct msm_clock *dgt = &msm_clocks[MSM_CLOCK_DGT];
-	*timer_val = msm_read_timer_count(dgt, GLOBAL_TIMER);
-	return 0;
-}
-#endif
-
 static void __init msm_timer_init(void)
 {
 	int i;
 	int res;
-
-#ifdef CONFIG_ARCH_MSM8X60
-	writel(DGT_CLK_CTL_DIV_4, MSM_TMR_BASE + DGT_CLK_CTL);
-#endif
 
 	for (i = 0; i < ARRAY_SIZE(msm_clocks); i++) {
 		struct msm_clock *clock = &msm_clocks[i];
@@ -1027,10 +988,6 @@ static void __init msm_timer_init(void)
 
 		clockevents_register_device(ce);
 	}
-#ifdef CONFIG_ARCH_MSM_SCORPIONMP
-	writel(1, msm_clocks[MSM_CLOCK_DGT].regbase + TIMER_ENABLE);
-	set_delay_fn(read_current_timer_delay_loop);
-#endif
 }
 
 #ifdef CONFIG_SMP
@@ -1038,10 +995,6 @@ void local_timer_setup(struct clock_event_device *evt)
 {
 	unsigned long flags;
 	struct msm_clock *clock = &msm_clocks[MSM_GLOBAL_TIMER];
-
-#ifdef CONFIG_ARCH_MSM8X60
-	writel(DGT_CLK_CTL_DIV_4, MSM_TMR_BASE + DGT_CLK_CTL);
-#endif
 
 	if (!local_clock_event) {
 		writel(0, clock->regbase  + TIMER_ENABLE);

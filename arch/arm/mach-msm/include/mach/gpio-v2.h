@@ -31,9 +31,6 @@
 #define __ASM_ARCH_MSM_GPIO_V2_H
 
 #include <mach/gpio-tlmm-v1.h>
-#if defined(CONFIG_ARCH_MSM8X60)
-#include <mach/gpio-v2-8x60.h>
-#endif
 
 /* MSM now supports generic GPIOLIB.  See Documentation/gpio.txt. */
 

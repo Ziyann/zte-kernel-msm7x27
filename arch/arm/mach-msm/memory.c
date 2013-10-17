@@ -56,7 +56,6 @@ void *strongly_ordered_page;
  */
 void map_page_strongly_ordered(void)
 {
-#if defined(CONFIG_ARCH_MSM7X27)
 	long unsigned int phys;
 
 	if (strongly_ordered_page)
@@ -68,13 +67,11 @@ void map_page_strongly_ordered(void)
 		phys,
 		get_mem_type(MT_DEVICE_STRONGLY_ORDERED));
 	printk(KERN_ALERT "Initialized strongly ordered page successfully\n");
-#endif
 }
 EXPORT_SYMBOL(map_page_strongly_ordered);
 
 void write_to_strongly_ordered_memory(void)
 {
-#if defined(CONFIG_ARCH_MSM7X27)
 	if (!strongly_ordered_page) {
 		if (!in_interrupt())
 			map_page_strongly_ordered();
@@ -86,17 +83,14 @@ void write_to_strongly_ordered_memory(void)
 		}
 	}
 	*(int *)strongly_ordered_page = 0;
-#endif
 }
 EXPORT_SYMBOL(write_to_strongly_ordered_memory);
 
 void flush_axi_bus_buffer(void)
 {
-#if defined(CONFIG_ARCH_MSM7X27)
 	__asm__ __volatile__ ("mcr p15, 0, %0, c7, c10, 5" \
 				    : : "r" (0) : "memory");
 	write_to_strongly_ordered_memory();
-#endif
 }
 
 #define CACHE_LINE_SIZE 32

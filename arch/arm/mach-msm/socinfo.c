@@ -135,24 +135,9 @@ static enum msm_cpu cpu_of_id[] = {
 	[69] = MSM_CPU_7X27, /* 7627-2 */
 
 
-	/* 8x50 IDs */
-	[30] = MSM_CPU_8X50,
-	[36] = MSM_CPU_8X50,
-	[37] = MSM_CPU_8X50,
-	[38] = MSM_CPU_8X50,
-
-	/* 8x50A IDs */
-	[64] = MSM_CPU_8X50A,
-	[65] = MSM_CPU_8X50A,
-
 	/* 7x30 IDs */
 	[59] = MSM_CPU_7X30,
 	[60] = MSM_CPU_7X30,
-
-	/* 8x55 IDs */
-	[74] = MSM_CPU_8X55,
-	[75] = MSM_CPU_8X55,
-	[85] = MSM_CPU_8X55,
 
 	/* Uninitialized IDs are not known to run Linux.
 	   MSM_CPU_UNKNOWN is set to 0 to ensure these IDs are
@@ -215,12 +200,7 @@ uint32_t socinfo_get_accessory_chip(void)
 
 enum msm_cpu socinfo_get_msm_cpu(void)
 {
-#ifdef CONFIG_ARCH_MSM8X60
-	/* Hardcode CPU for 8x60, which doesn't support socinfo yet. */
-	return MSM_CPU_8X60;
-#else
 	return cur_cpu;
-#endif
 }
 
 static ssize_t

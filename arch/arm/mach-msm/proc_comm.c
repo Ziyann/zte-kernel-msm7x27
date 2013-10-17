@@ -26,13 +26,7 @@
 #include "proc_comm.h"
 #include "smd_private.h"
 
-#if defined(CONFIG_ARCH_MSM7X30)
-#define MSM_TRIG_A2M_PC_INT (writel(1 << 6, MSM_GCC_BASE + 0x8))
-#elif defined(CONFIG_ARCH_MSM8X60)
-#define MSM_TRIG_A2M_PC_INT (writel(1 << 5, MSM_GCC_BASE + 0x8))
-#else
 #define MSM_TRIG_A2M_PC_INT (writel(1, MSM_CSR_BASE + 0x400 + (6) * 4))
-#endif
 
 static inline void notify_other_proc_comm(void)
 {

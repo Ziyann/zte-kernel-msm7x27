@@ -44,11 +44,7 @@ enum msm_cpu {
 	MSM_CPU_7X01,
 	MSM_CPU_7X25,
 	MSM_CPU_7X27,
-	MSM_CPU_8X50,
-	MSM_CPU_8X50A,
 	MSM_CPU_7X30,
-	MSM_CPU_8X55,
-	MSM_CPU_8X60,
 };
 
 enum msm_cpu socinfo_get_msm_cpu(void);
@@ -94,38 +90,6 @@ static inline int cpu_is_msm7x30(void)
 
 	BUG_ON(cpu == MSM_CPU_UNKNOWN);
 	return cpu == MSM_CPU_7X30;
-}
-
-static inline int cpu_is_qsd8x50(void)
-{
-	enum msm_cpu cpu = socinfo_get_msm_cpu();
-
-	BUG_ON(cpu == MSM_CPU_UNKNOWN);
-	return cpu == MSM_CPU_8X50;
-}
-
-static inline int cpu_is_qsd8x50a(void)
-{
-	enum msm_cpu cpu = socinfo_get_msm_cpu();
-
-	BUG_ON(cpu == MSM_CPU_UNKNOWN);
-	return cpu == MSM_CPU_8X50A;
-}
-
-static inline int cpu_is_msm8x55(void)
-{
-	enum msm_cpu cpu = socinfo_get_msm_cpu();
-
-	BUG_ON(cpu == MSM_CPU_UNKNOWN);
-	return cpu == MSM_CPU_8X55;
-}
-
-static inline int cpu_is_msm8x60(void)
-{
-	enum msm_cpu cpu = socinfo_get_msm_cpu();
-
-	BUG_ON(cpu == MSM_CPU_UNKNOWN);
-	return cpu == MSM_CPU_8X60;
 }
 
 #endif

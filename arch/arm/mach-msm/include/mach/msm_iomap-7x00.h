@@ -149,10 +149,4 @@
 #define MSM_TSSC_PHYS         0xAA300000
 #define MSM_TSSC_SIZE         SZ_4K
 
-#if defined(CONFIG_ARCH_MSM7X30)
-#define MSM_GCC_BASE          IOMEM(0xF8009000)
-#define MSM_GCC_PHYS          0xC0182000
-#define MSM_GCC_SIZE          SZ_4K
-#endif
-
 #endif

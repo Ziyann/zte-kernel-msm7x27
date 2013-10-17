@@ -72,17 +72,9 @@ enum clkvote_client {
 	CLKVOTE_MAX,
 };
 
-#ifdef CONFIG_ARCH_MSM7X30
-void __init msm_clk_soc_set_ops(struct clk *clk);
-#else
 static inline void __init msm_clk_soc_set_ops(struct clk *clk) { }
-#endif
 
-#if defined(CONFIG_ARCH_MSM7X30) || defined(CONFIG_ARCH_MSM8X60)
-void __init msm_clk_soc_init(void);
-#else
 static inline void __init msm_clk_soc_init(void) { }
-#endif
 
 #ifdef CONFIG_DEBUG_FS
 int __init clock_debug_init(struct list_head *head);

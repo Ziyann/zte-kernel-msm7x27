@@ -79,11 +79,7 @@ do { \
 #define D(x...) do {} while (0)
 #endif
 
-#if defined(CONFIG_ARCH_MSM7X30) || defined(CONFIG_ARCH_MSM8X60)
-#define TIMESTAMP_ADDR (MSM_TMR_BASE + 0x08)
-#else
 #define TIMESTAMP_ADDR (MSM_TMR_BASE + 0x04)
-#endif
 
 struct smem_log_item {
 	uint32_t identifier;

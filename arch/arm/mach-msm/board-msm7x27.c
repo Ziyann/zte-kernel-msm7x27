@@ -76,9 +76,7 @@ when         who        what, where, why                             comment tag
 #include <linux/usb/android.h>
 #endif
 #include "pm.h"
-#ifdef CONFIG_ARCH_MSM7X27
 #include <linux/msm_kgsl.h>
-#endif
 
 #ifdef CONFIG_ZTE_PLATFORM
 #include "msm_usb_config.h" //USB-HML-001
@@ -86,15 +84,7 @@ when         who        what, where, why                             comment tag
 /*ZTE_GSENSOR_FYA_001,@2010-02-06,BEGIN*/
 #include <linux/lis302dl.h>
 /*ZTE_GSENSOR_FYA_001,@2010-02-06,END*/
-#ifdef CONFIG_ARCH_MSM7X25
-#define MSM_PMEM_MDP_SIZE	0xb21000
-#define MSM_PMEM_ADSP_SIZE	0x97b000
-#define MSM_PMEM_AUDIO_SIZE	0x121000
-#define MSM_FB_SIZE		0x200000
-#define PMEM_KERNEL_EBI1_SIZE	0x64000
-#endif
 
-#ifdef CONFIG_ARCH_MSM7X27
 #define MSM_PMEM_MDP_SIZE	0x1B76000
 #define MSM_PMEM_ADSP_SIZE	0xB71000
 #define MSM_PMEM_AUDIO_SIZE	0x5B000
@@ -103,7 +93,6 @@ when         who        what, where, why                             comment tag
 #define PMEM_KERNEL_EBI1_SIZE	0x1C000
 /* Using lower 1MB of OEMSBL memory for GPU_PHYS */
 #define MSM_GPU_PHYS_START_ADDR	 0xD600000ul
-#endif
 
 #ifdef CONFIG_ANDROID_RAM_CONSOLE
 #define MSM_RAM_CONSOLE_PHYS  0x02900000
@@ -510,14 +499,9 @@ static struct platform_device msm_device_snd = {
 #define DEC2_FORMAT ((1<<MSM_ADSP_CODEC_WAV)|(1<<MSM_ADSP_CODEC_ADPCM)| \
 	(1<<MSM_ADSP_CODEC_YADPCM)|(1<<MSM_ADSP_CODEC_QCELP))
 
-#ifdef CONFIG_ARCH_MSM7X25
-#define DEC3_FORMAT 0
-#define DEC4_FORMAT 0
-#else
 #define DEC3_FORMAT ((1<<MSM_ADSP_CODEC_WAV)|(1<<MSM_ADSP_CODEC_ADPCM)| \
 	(1<<MSM_ADSP_CODEC_YADPCM)|(1<<MSM_ADSP_CODEC_QCELP))
 #define DEC4_FORMAT (1<<MSM_ADSP_CODEC_MIDI)
-#endif
 
 static unsigned int dec_concurrency_table[] = {
 	/* Audio LP */
@@ -575,13 +559,8 @@ static struct msm_adspdec_info dec_info_list[] = {
 	DEC_INFO("AUDPLAY0TASK", 13, 0, 11), /* AudPlay0BitStreamCtrlQueue */
 	DEC_INFO("AUDPLAY1TASK", 14, 1, 4),  /* AudPlay1BitStreamCtrlQueue */
 	DEC_INFO("AUDPLAY2TASK", 15, 2, 4),  /* AudPlay2BitStreamCtrlQueue */
-#ifdef CONFIG_ARCH_MSM7X25
-	DEC_INFO("AUDPLAY3TASK", 16, 3, 0),  /* AudPlay3BitStreamCtrlQueue */
-	DEC_INFO("AUDPLAY4TASK", 17, 4, 0),  /* AudPlay4BitStreamCtrlQueue */
-#else
 	DEC_INFO("AUDPLAY3TASK", 16, 3, 4),  /* AudPlay3BitStreamCtrlQueue */
 	DEC_INFO("AUDPLAY4TASK", 17, 4, 1),  /* AudPlay4BitStreamCtrlQueue */
-#endif
 };
 
 static struct msm_adspdec_database msm_device_adspdec_database = {
@@ -1070,7 +1049,6 @@ static void __init bt_power_init(void)
 #define bt_power_init(x) do {} while (0)
 #endif
 
-#ifdef CONFIG_ARCH_MSM7X27
 static struct resource kgsl_resources[] = {
 	{
 		.name = "kgsl_reg_memory",
@@ -1103,7 +1081,6 @@ static struct platform_device msm_device_kgsl = {
 		.platform_data = &kgsl_pdata,
 	},
 };
-#endif
 
 static struct platform_device msm_device_pmic_leds = {
 	.name   = "pmic-leds-status",
@@ -2367,9 +2344,7 @@ static struct platform_device *devices[] __initdata = {
 	&msm_camera_sensor_vb6801,
 #endif
 	&msm_bluesleep_device,
-#ifdef CONFIG_ARCH_MSM7X27
 	&msm_device_kgsl,
-#endif
 #ifdef CONFIG_MT9P111
     /*
      * Commented by zh.shj
@@ -3012,11 +2987,7 @@ static void __init msm7x2x_init(void)
 	
 	if (socinfo_init() < 0)
 		BUG();
-#ifdef CONFIG_ARCH_MSM7X25
-	msm_clock_init(msm_clocks_7x25, msm_num_clocks_7x25);
-#elif CONFIG_ARCH_MSM7X27
 	msm_clock_init(msm_clocks_7x27, msm_num_clocks_7x27);
-#endif
 	platform_add_devices(early_devices, ARRAY_SIZE(early_devices));
 
 #if defined(CONFIG_MSM_SERIAL_DEBUGGER)
@@ -3047,7 +3018,6 @@ static void __init msm7x2x_init(void)
 #if defined(CONFIG_MACH_BLADE) ||defined(CONFIG_MACH_MOONCAKE)	//ZTE_BOOT_HUANGYJ_20100816_01 
 	init_usb3v3();//USB-HML-001 enable ldo.
 	#endif
-#ifdef CONFIG_ARCH_MSM7X27
 	/* Initialize the zero page for barriers and cache ops */
 	map_zero_page_strongly_ordered();
 	/* This value has been set to 160000 for power savings. */
@@ -3067,7 +3037,6 @@ static void __init msm7x2x_init(void)
 	kgsl_pdata.imem_clk_name = "imem_clk";
 	kgsl_pdata.grp3d_clk_name = "grp_clk";
 	kgsl_pdata.grp2d_clk_name = NULL;
-#endif
 
 //ZTE_BOOT_JIANGFENG_20100223_01, start
 #if 0
@@ -3258,7 +3227,6 @@ static void __init msm_msm7x2x_allocate_memory_regions(void)
 		pr_info("allocating %lu bytes at %p (%lx physical) for kernel"
 			" ebi1 pmem arena\n", size, addr, __pa(addr));
 	}
-#ifdef CONFIG_ARCH_MSM7X27
 	size = MSM_GPU_PHYS_SIZE;
 	addr = alloc_bootmem(size);
 	kgsl_resources[1].start = __pa(addr);
@@ -3266,7 +3234,6 @@ static void __init msm_msm7x2x_allocate_memory_regions(void)
 	pr_info("allocating %lu bytes (at %lx physical) for KGSL\n",
 		size , MSM_GPU_PHYS_START_ADDR);
 
-#endif
 
 #if defined(CONFIG_ZTE_PLATFORM) && defined(CONFIG_F3_LOG)
 /* ZTE_F3LOG_YYM_0804 begin */

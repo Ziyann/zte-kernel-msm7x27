@@ -69,16 +69,6 @@ struct msm_spm_platform_data {
 	uint32_t vctl_timeout_us;
 };
 
-#if defined(CONFIG_ARCH_MSM7X30) || defined(CONFIG_ARCH_MSM8X60)
-
-int msm_spm_set_low_power_mode(unsigned int mode, bool notify_rpm);
-int msm_spm_set_vdd(unsigned int cpu, unsigned int vlevel);
-void msm_spm_reinit(void);
-void msm_spm_allow_x_cpu_set_vdd(bool allowed);
-int msm_spm_init(struct msm_spm_platform_data *data, int nr_devs);
-
-#else
-
 static inline int msm_spm_set_low_power_mode(unsigned int mode, bool notify_rpm)
 {
 	return -ENOSYS;
@@ -103,7 +93,5 @@ static inline int msm_spm_init(struct msm_spm_platform_data *data, int nr_devs)
 {
 	return -ENOSYS;
 }
-
-#endif  /* defined(CONFIG_ARCH_MSM7X30) || defined(CONFIG_ARCH_MSM8X60) */
 
 #endif  /* __ARCH_ARM_MACH_MSM_SPM_H */

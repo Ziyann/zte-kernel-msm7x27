@@ -30,7 +30,6 @@ ENTRY(msm_arch_idle)
 	mrs	r2, cpsr		/* save the CPSR state */
 	cpsid   iaf			/* explictly disable I,A and F */
 
-#if defined(CONFIG_ARCH_MSM7X27)
 	mov     r0, #0
 	mcr     p15, 0, r0, c7, c10, 0   /* flush entire data cache */
 	mcr     p15, 0, r0, c7, c10, 4   /* dsb                */
@@ -38,23 +37,6 @@ ENTRY(msm_arch_idle)
 	bl      write_to_strongly_ordered_memory  /* flush AXI bus buffer */
 	ldmfd   sp!, {r2, lr}
 	mcr     p15, 0, r0, c7, c0, 4    /* wait for interrupt */
-#else
-	mrc     p15, 0, r1, c1, c0, 0    /* read current CR    */
-	bic     r0, r1, #(1 << 2)        /* clear dcache bit   */
-	bic     r0, r0, #(1 << 12)       /* clear icache bit   */
-	mcr     p15, 0, r0, c1, c0, 0    /* disable d/i cache  */
-
-	mov     r0, #0
-	mcr     p15, 0, r0, c7, c5, 0    /* invalidate icache and flush */
-	                                 /* branch target cache */
-	mcr     p15, 0, r0, c7, c14, 0   /* clean and invalidate dcache */
-
-	mcr     p15, 0, r0, c7, c10, 4   /* dsb                */
-	mcr     p15, 0, r0, c7, c0, 4    /* wait for interrupt */
-
-	mcr     p15, 0, r1, c1, c0, 0    /* restore d/i cache  */
-	mcr     p15, 0, r0, c7, c5, 4    /* isb                */
-#endif
 
 	msr	cpsr_c, r2		/* restore the CPSR state */
 	mov     pc, lr

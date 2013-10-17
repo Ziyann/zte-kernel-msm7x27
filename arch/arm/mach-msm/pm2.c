@@ -401,32 +401,17 @@ enum {
  * Configure Hardware for Power Down/Up
  *****************************************************************************/
 
-#if defined(CONFIG_ARCH_MSM7X30)
-#define APPS_CLK_SLEEP_EN (MSM_GCC_BASE + 0x020)
-#define APPS_PWRDOWN      (MSM_ACC_BASE + 0x01c)
-#define APPS_SECOP        (MSM_TCSR_BASE + 0x038)
-#else /* defined(CONFIG_ARCH_MSM7X30) */
 #define APPS_CLK_SLEEP_EN (MSM_CSR_BASE + 0x11c)
 #define APPS_PWRDOWN      (MSM_CSR_BASE + 0x440)
 #define APPS_STANDBY_CTL  (MSM_CSR_BASE + 0x108)
-#endif /* defined(CONFIG_ARCH_MSM7X30) */
 
 /*
  * Configure hardware registers in preparation for Apps power down.
  */
 static void msm_pm_config_hw_before_power_down(void)
 {
-#if defined(CONFIG_ARCH_MSM7X30)
-	writel(1, APPS_PWRDOWN);
-	writel(4, APPS_SECOP);
-#elif defined(CONFIG_ARCH_MSM7X27)
 	writel(0x1f, APPS_CLK_SLEEP_EN);
 	writel(1, APPS_PWRDOWN);
-#else
-	writel(0x1f, APPS_CLK_SLEEP_EN);
-	writel(1, APPS_PWRDOWN);
-	writel(0, APPS_STANDBY_CTL);
-#endif
 }
 
 /*
@@ -434,14 +419,8 @@ static void msm_pm_config_hw_before_power_down(void)
  */
 static void msm_pm_config_hw_after_power_up(void)
 {
-#if defined(CONFIG_ARCH_MSM7X30)
-	writel(0, APPS_SECOP);
-	writel(0, APPS_PWRDOWN);
-	msm_spm_reinit();
-#else
 	writel(0, APPS_PWRDOWN);
 	writel(0, APPS_CLK_SLEEP_EN);
-#endif
 }
 
 /*
@@ -449,11 +428,7 @@ static void msm_pm_config_hw_after_power_up(void)
  */
 static void msm_pm_config_hw_before_swfi(void)
 {
-#if defined(CONFIG_ARCH_QSD8X50)
-	writel(0x1f, APPS_CLK_SLEEP_EN);
-#elif defined(CONFIG_ARCH_MSM7X27)
 	writel(0x0f, APPS_CLK_SLEEP_EN);
-#endif
 }
 
 /*
@@ -2100,21 +2075,11 @@ static int __init msm_pm_init(void)
 		return -ENODEV;
 	}
 
-#ifdef CONFIG_ARCH_MSM_SCORPION
-	/* The bootloader is responsible for initializing many of Scorpion's
-	 * coprocessor registers for things like cache timing. The state of
-	 * these coprocessor registers is lost on reset, so part of the
-	 * bootloader must be re-executed. Do not overwrite the reset vector
-	 * or bootloader area.
-	 */
-	msm_pm_reset_vector = (uint32_t *) PAGE_OFFSET;
-#else
 	msm_pm_reset_vector = ioremap(0, PAGE_SIZE);
 	if (msm_pm_reset_vector == NULL) {
 		printk(KERN_ERR "%s: failed to map reset vector\n", __func__);
 		return -ENODEV;
 	}
-#endif /* CONFIG_ARCH_MSM_SCORPION */
 
 	ret = msm_timer_init_time_sync(msm_pm_timeout);
 	if (ret)

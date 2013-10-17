@@ -101,9 +101,7 @@ when         who        what, where, why                             comment tag
 #include "msm-keypad-devices.h"
 
 #include "pm.h"
-#ifdef CONFIG_ARCH_MSM7X27
 #include <linux/msm_kgsl.h>
-#endif
 
 #ifdef CONFIG_ZTE_PLATFORM
 //#include "msm_usb_config.h" //USB-HML-001
@@ -119,14 +117,6 @@ when         who        what, where, why                             comment tag
 #endif
 
 
-#ifdef CONFIG_ARCH_MSM7X25
-#define MSM_PMEM_MDP_SIZE	0xb21000
-#define MSM_PMEM_ADSP_SIZE	0x97b000
-#define MSM_FB_SIZE		0x200000
-#define PMEM_KERNEL_EBI1_SIZE	0x64000
-#endif
-
-#ifdef CONFIG_ARCH_MSM7X27
 #define MSM_PMEM_MDP_SIZE	0x1B76000
 #define MSM_PMEM_ADSP_SIZE	0xB71000
 #ifdef CONFIG_FB_MSM_TRIPLE_BUFFER
@@ -138,7 +128,6 @@ when         who        what, where, why                             comment tag
 #define PMEM_KERNEL_EBI1_SIZE	0x1C000
 /* Using lower 1MB of OEMSBL memory for GPU_PHYS */
 #define MSM_GPU_PHYS_START_ADDR	 0xD600000ul
-#endif
 
 #ifdef CONFIG_ANDROID_RAM_CONSOLE
 #define MSM_RAM_CONSOLE_PHYS  (PHYS_OFFSET - 0x100000)
@@ -318,14 +307,9 @@ static struct platform_device msm_device_snd = {
 	(1<<MSM_ADSP_CODEC_YADPCM)|(1<<MSM_ADSP_CODEC_QCELP)| \
 	(1<<MSM_ADSP_CODEC_MP3))
 
-#ifdef CONFIG_ARCH_MSM7X25
-#define DEC3_FORMAT 0
-#define DEC4_FORMAT 0
-#else
 #define DEC3_FORMAT ((1<<MSM_ADSP_CODEC_WAV)|(1<<MSM_ADSP_CODEC_ADPCM)| \
 	(1<<MSM_ADSP_CODEC_YADPCM)|(1<<MSM_ADSP_CODEC_QCELP))
 #define DEC4_FORMAT (1<<MSM_ADSP_CODEC_MIDI)
-#endif
 
 static unsigned int dec_concurrency_table[] = {
 	/* Audio LP */
@@ -383,13 +367,8 @@ static struct msm_adspdec_info dec_info_list[] = {
 	DEC_INFO("AUDPLAY0TASK", 13, 0, 11), /* AudPlay0BitStreamCtrlQueue */
 	DEC_INFO("AUDPLAY1TASK", 14, 1, 5),  /* AudPlay1BitStreamCtrlQueue */
 	DEC_INFO("AUDPLAY2TASK", 15, 2, 5),  /* AudPlay2BitStreamCtrlQueue */
-#ifdef CONFIG_ARCH_MSM7X25
-	DEC_INFO("AUDPLAY3TASK", 16, 3, 0),  /* AudPlay3BitStreamCtrlQueue */
-	DEC_INFO("AUDPLAY4TASK", 17, 4, 0),  /* AudPlay4BitStreamCtrlQueue */
-#else
 	DEC_INFO("AUDPLAY3TASK", 16, 3, 4),  /* AudPlay3BitStreamCtrlQueue */
 	DEC_INFO("AUDPLAY4TASK", 17, 4, 1),  /* AudPlay4BitStreamCtrlQueue */
-#endif
 };
 
 static struct msm_adspdec_database msm_device_adspdec_database = {
@@ -937,8 +916,6 @@ static void __init bt_power_init(void)
 #define bt_power_init(x) do {} while (0)
 #endif
 
-#ifdef CONFIG_ARCH_MSM7X27
-
 static struct resource kgsl_3d0_resources[] = {
 	{
 		.name  = KGSL_3D0_REG_MEMORY,
@@ -983,7 +960,6 @@ struct platform_device msm_kgsl_3d0 = {
 		.platform_data = &kgsl_3d0_pdata,
 	},
 };
-#endif
 
 static struct platform_device msm_device_pmic_leds = {
 	.name   = "pmic-leds-status",
@@ -2725,9 +2701,7 @@ static struct platform_device *devices[] __initdata = {
 #endif
 	&msm_bluesleep_device,
 	&msm_bcmsleep_device,     //compatible of qualcomm and broadcomm bluetooth chip     ZTE_BT_QXX_20101207
-#ifdef CONFIG_ARCH_MSM7X27
 	&msm_kgsl_3d0,
-#endif
 #ifdef CONFIG_MT9P111
     /*
      * Commented by zh.shj
@@ -3482,11 +3456,7 @@ static void __init msm7x2x_init(void)
 
 	if (socinfo_init() < 0)
 		BUG();
-#ifdef CONFIG_ARCH_MSM7X25
-	msm_clock_init(msm_clocks_7x25, msm_num_clocks_7x25);
-#elif CONFIG_ARCH_MSM7X27
 	msm_clock_init(msm_clocks_7x27, msm_num_clocks_7x27);
-#endif
 	platform_add_devices(early_devices, ARRAY_SIZE(early_devices));
 
 #if defined(CONFIG_MSM_SERIAL_DEBUGGER)

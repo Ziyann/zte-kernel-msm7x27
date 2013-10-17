@@ -902,21 +902,11 @@ static int __init msm_pm_init(void)
 		return -ENODEV;
 	}
 
-#if defined(CONFIG_ARCH_MSM_SCORPION)
-	/* The bootloader is responsible for initializing many of Scorpion's
-	 * coprocessor registers for things like cache timing. The state of
-	 * these coprocessor registers is lost on reset, so part of the
-	 * bootloader must be re-executed. Do not overwrite the reset vector
-	 * or bootloader area.
-	 */
-	msm_pm_reset_vector = (uint32_t *) PAGE_OFFSET;
-#else
 	msm_pm_reset_vector = ioremap(0, PAGE_SIZE);
 	if (msm_pm_reset_vector == NULL) {
 		printk(KERN_ERR "msm_pm_init: failed to map reset vector\n");
 		return -ENODEV;
 	}
-#endif /* CONFIG_ARCH_MSM_SCORPION */
 
 	ret = msm_timer_init_time_sync(msm_pm_timeout);
 	if (ret)
